@@ -404,18 +404,30 @@ export default function DanmakuPanel({
           </div>
         )}
         </div>
+
+        {/* 上传弹幕区域 - 移动端：在滚动容器内 */}
+        {onUploadDanmaku && (
+          <div className='mt-3 border-t border-gray-200 pt-3 dark:border-gray-700 md:hidden'>
+            <input
+              ref={fileInputRef}
+              type='file'
+              accept='.xml'
+              onChange={handleFileUpload}
+              className='hidden'
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className='w-full text-center text-xs text-gray-500 dark:text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors py-2'
+            >
+              搜不到想要的弹幕？自行上传
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* 上传弹幕区域 - 固定在底部 */}
+      {/* 上传弹幕区域 - PC端：固定在底部 */}
       {onUploadDanmaku && (
-        <div className='mt-3 flex-shrink-0 border-t border-gray-200 pt-3 dark:border-gray-700'>
-          <input
-            ref={fileInputRef}
-            type='file'
-            accept='.xml'
-            onChange={handleFileUpload}
-            className='hidden'
-          />
+        <div className='mt-3 flex-shrink-0 border-t border-gray-200 pt-3 dark:border-gray-700 hidden md:block'>
           <button
             onClick={() => fileInputRef.current?.click()}
             className='w-full text-center text-xs text-gray-500 dark:text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors py-2'
