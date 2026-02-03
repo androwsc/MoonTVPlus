@@ -3,6 +3,8 @@
 import { AlertTriangle,Radio } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { useWebLiveSync } from '@/hooks/useWebLiveSync';
+
 import PageLayout from '@/components/PageLayout';
 
 let Artplayer: any = null;
@@ -26,6 +28,22 @@ export default function WebLivePage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [isWebLiveEnabled, setIsWebLiveEnabled] = useState<boolean | null>(null);
+
+  // 观影室同步功能
+  const webLiveSync = useWebLiveSync({
+    currentSourceKey: currentSource?.key || '',
+    currentSourceName: currentSource?.name || '',
+    currentSourcePlatform: currentSource?.platform || '',
+    currentSourceRoomId: currentSource?.roomId || '',
+    onSourceChange: (sourceKey, platform, roomId) => {
+      // 房员接收到直播源切换指令
+      if (!sources || !Array.isArray(sources)) return;
+      const source = sources.find(s => s.key === sourceKey);
+      if (source) {
+        handleSourceClick(source);
+      }
+    },
+  });
 
   useEffect(() => {
     const meta = document.createElement('meta');
@@ -419,7 +437,7 @@ export default function WebLivePage() {
               </div>
 
               {/* 外部播放器按钮 */}
-              {currentSource && (
+              {currentSource && !webLiveSync.isInRoom && (
                 <div className='mt-3 px-2 lg:flex-shrink-0 flex justify-end'>
                   <div className='bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg p-2 border border-gray-200/50 dark:border-gray-700/50 w-full lg:w-auto overflow-x-auto'>
                     <div className='flex gap-1.5 justify-end lg:flex-wrap items-center'>
@@ -653,7 +671,8 @@ export default function WebLivePage() {
                           <button
                             key={source.key}
                             onClick={() => handleSourceClick(source)}
-                            className={`w-full p-3 rounded-lg text-left transition-all duration-200 ${isActive ? 'bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                            disabled={webLiveSync.shouldDisableControls}
+                            className={`w-full p-3 rounded-lg text-left transition-all duration-200 ${isActive ? 'bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700' : 'hover:bg-gray-100 dark:hover:bg-gray-700'} ${webLiveSync.shouldDisableControls ? 'opacity-50 cursor-not-allowed' : ''}`}
                           >
                             <div className='flex items-center gap-3'>
                               <div className='w-10 h-10 bg-gray-300 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0'>
@@ -688,7 +707,8 @@ export default function WebLivePage() {
                           <button
                             key={platform}
                             onClick={() => handlePlatformClick(platform)}
-                            className='w-full flex items-start gap-3 px-2 py-3 rounded-lg bg-gray-200/50 dark:bg-white/10 hover:bg-gray-300/50 dark:hover:bg-white/20 transition-all duration-200 cursor-pointer'
+                            disabled={webLiveSync.shouldDisableControls}
+                            className={`w-full flex items-start gap-3 px-2 py-3 rounded-lg bg-gray-200/50 dark:bg-white/10 hover:bg-gray-300/50 dark:hover:bg-white/20 transition-all duration-200 cursor-pointer ${webLiveSync.shouldDisableControls ? 'opacity-50 cursor-not-allowed' : ''}`}
                           >
                             <div className='w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden'>
                               {platform === 'huya' ? (
